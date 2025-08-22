@@ -13,7 +13,7 @@
     import CommentBox from '../../../components/CommentBox/CommentBox';
     import AttachedFiles from '../../../components/AttachedFiles/AttachedFiles';
     import TaskActions from '../../../components/TaskActions/TaskActions';
-    import CommentList from '../../../components/CommentList/CommentList'; // ← New component
+    import CommentList from '../../../components/CommentList/CommentList';
     import SharedButton from '../../../components/SharedButton/SharedButton';
 
     // Toastify
@@ -23,7 +23,7 @@
     // Custom Hook
     import useClickOutside from '../../../hooks/useClickOutside';
 
-    const TaskDetailUpcoming = () => {
+    const TaskDetail = () => {
       const navigate = useNavigate();
       const [attachedFiles, setAttachedFiles] = useState([]);
       const [isCompleted, setIsCompleted] = useState(false);
@@ -296,4 +296,4 @@
       );
     };
 
-    export default TaskDetailUpcoming;
+    export default TaskDetail;

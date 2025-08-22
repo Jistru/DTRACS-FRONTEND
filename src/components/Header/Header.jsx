@@ -59,18 +59,18 @@ const Header = ({ toggleSidebar }) => {
 
       {/* Profile Dropdown */}
       <div className="header-right" ref={dropdownRef}>
-        <button className="profile-btn" onClick={toggleDropdown}>
-          <div className="profile-icon-wrapper">
+        <button className="profile-btn-side" onClick={toggleDropdown}>
+          <div className="profile-icon-wrapper-side">
             <FaUserCircle className="profile-main-icon" />
             <IoChevronDownCircle className="profile-sub-icon" />
           </div>
         </button>
 
         {isDropdownOpen && (
-          <div className="profile-dropdown">
-            <div className="profile-info">
-              <FaUserCircle className="profile-avatar" />
-              <div className="profile-details">
+          <div className="profile-dropdown-side">
+            <div className="profile-info-side">
+              <FaUserCircle className="profile-avatar-side" />
+              <div className="profile-details-side">
                 <strong>Juan D Cruz</strong>
                 <div className="profile-email">juandcruz@gmail.com</div>
                 <div className="profile-id">2023-00***-01</div>
