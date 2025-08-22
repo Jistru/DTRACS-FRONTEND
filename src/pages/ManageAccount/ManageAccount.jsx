@@ -1,7 +1,7 @@
 // src/pages/ManageAccount/ManageAccount.jsx
 import React, { useState, useRef } from 'react';
-import { FaUserEdit } from "react-icons/fa"; // Added FaUserEdit
 import { FaCirclePlus } from "react-icons/fa6";
+import { FaUserEdit } from "react-icons/fa";
 import { MdAccountCircle } from "react-icons/md";
 import './ManageAccount.css';
 
@@ -10,7 +10,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const ManageAccount = () => {
-  const [isEditing, setIsEditing] = useState(false); // Controls edit mode
+  const [isEditing, setIsEditing] = useState(false);
   const [showNameForm, setShowNameForm] = useState(false);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
@@ -27,43 +27,61 @@ const ManageAccount = () => {
     contactNumber: "+63 9123456789"
   });
 
-  // Temp fields for unsaved changes
-  const [tempName, setTempName] = useState({ firstName: "", middleName: "", lastName: "" });
-  const [tempEmail, setTempEmail] = useState("");
-  const [tempContact, setTempContact] = useState("");
+  // ✅ Initialize temp fields as null – means "form never opened"
+  const [tempName, setTempName] = useState(null);
+  const [tempEmail, setTempEmail] = useState(null);
+  const [tempContact, setTempContact] = useState(null);
 
-  // Initialize temp fields
+  // Open Name Form
   const openNameForm = () => {
-    setTempName({ ...userData });
+    setTempName({ ...userData }); // Set only when opened
     setShowNameForm(true);
   };
 
+  // Open Email Form
   const openEmailForm = () => {
     setTempEmail(userData.email);
     setShowEmailForm(true);
   };
 
+  // Open Contact Form
   const openContactForm = () => {
     setTempContact(userData.contactNumber);
     setShowContactForm(true);
   };
 
-  // Check for unsaved changes
-  const hasNameChanges = () =>
-    tempName.firstName !== userData.firstName ||
-    tempName.middleName !== userData.middleName ||
-    tempName.lastName !== userData.lastName;
+  // ✅ Only check for changes if form was opened (temp !== null)
+  const hasNameChanges = () => {
+    if (!tempName) return false;
+    return (
+      tempName.firstName.trim() !== userData.firstName.trim() ||
+      tempName.middleName.trim() !== userData.middleName.trim() ||
+      tempName.lastName.trim() !== userData.lastName.trim()
+    );
+  };
 
-  const hasEmailChanges = () => tempEmail !== userData.email;
-  const hasContactChanges = () => tempContact !== userData.contactNumber;
+  const hasEmailChanges = () => {
+    if (!tempEmail) return false;
+    return tempEmail.trim() !== userData.email.trim();
+  };
 
-  const hasAnyUnsaved = () =>
-    hasNameChanges() || hasEmailChanges() || hasContactChanges();
+  const hasContactChanges = () => {
+    if (!tempContact) return false;
+    return tempContact.trim() !== userData.contactNumber.trim();
+  };
 
   // Confirm discard
   const confirmDiscard = (hasChanges, onClose) => {
-    if (!hasChanges || window.confirm("You have unsaved changes. Are you sure you want to discard them?")) {
-      onClose();
+    if (!hasChanges) {
+      onClose(); // No real changes → close silently
+    } else {
+      const confirmed = window.confirm("You have unsaved changes. Are you sure you want to discard them?");
+      if (confirmed) {
+        toast.info("Changes discarded.", { autoClose: 1500 });
+        onClose();
+      } else {
+        toast.info("Edit cancelled. Your changes are safe.", { autoClose: 1500 });
+      }
     }
   };
 
@@ -76,8 +94,9 @@ const ManageAccount = () => {
         middleName: tempName.middleName,
         lastName: tempName.lastName
       }));
-      toast.success("Name updated!");
+      toast.success("Name updated successfully!");
       setShowNameForm(false);
+      setTempName(null); // Reset
     } else {
       toast.warn("Please fill in required fields.");
     }
@@ -86,8 +105,9 @@ const ManageAccount = () => {
   const handleSaveEmail = () => {
     if (tempEmail.includes("@")) {
       setUserData(prev => ({ ...prev, email: tempEmail }));
-      toast.success("Email updated!");
+      toast.success("Email updated successfully!");
       setShowEmailForm(false);
+      setTempEmail(null);
     } else {
       toast.warn("Please enter a valid email.");
     }
@@ -96,8 +116,9 @@ const ManageAccount = () => {
   const handleSaveContact = () => {
     if (tempContact.trim()) {
       setUserData(prev => ({ ...prev, contactNumber: tempContact }));
-      toast.success("Contact updated!");
+      toast.success("Contact number updated successfully!");
       setShowContactForm(false);
+      setTempContact(null);
     } else {
       toast.warn("Please enter a contact number.");
     }
@@ -135,11 +156,15 @@ const ManageAccount = () => {
 
   // Toggle edit mode
   const toggleEditMode = () => {
-    if (isEditing && hasAnyUnsaved()) {
-      const confirmed = window.confirm("You have unsaved changes. Are you sure you want to exit edit mode?");
-      if (!confirmed) return;
+    if (isEditing) {
+      // On exit edit mode
+      setIsEditing(false);
+      toast.info("Exited edit mode.", { autoClose: 1500 });
+    } else {
+      // Enter edit mode
+      setIsEditing(true);
+      toast.info("Edit mode enabled. Make your changes!", { autoClose: 2000 });
     }
-    setIsEditing(!isEditing);
   };
 
   return (
@@ -228,45 +253,48 @@ const ManageAccount = () => {
                 onClick={() => confirmDiscard(hasNameChanges(), () => {
                   setShowNameForm(!showNameForm);
                   if (!showNameForm) openNameForm();
+                  else setTempName(null); // Reset if closing
                 })}
               >
                 <span>Change your name</span>
                 <span className="arrow">{showNameForm ? '▼' : '▶'}</span>
               </button>
-              <div className="edit-form">
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>First Name:</label>
-                    <input
-                      type="text"
-                      value={tempName.firstName}
-                      onChange={(e) => setTempName(prev => ({ ...prev, firstName: e.target.value }))}
-                      placeholder="Juan"
-                    />
+              {showNameForm && (
+                <div className="edit-form">
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>First Name:</label>
+                      <input
+                        type="text"
+                        value={tempName?.firstName || ''}
+                        onChange={(e) => setTempName(prev => ({ ...prev, firstName: e.target.value }))}
+                        placeholder="Juan"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Middle Name:</label>
+                      <input
+                        type="text"
+                        value={tempName?.middleName || ''}
+                        onChange={(e) => setTempName(prev => ({ ...prev, middleName: e.target.value }))}
+                        placeholder="Twoo"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Last Name:</label>
+                      <input
+                        type="text"
+                        value={tempName?.lastName || ''}
+                        onChange={(e) => setTempName(prev => ({ ...prev, lastName: e.target.value }))}
+                        placeholder="Dela Cruz"
+                      />
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label>Middle Name:</label>
-                    <input
-                      type="text"
-                      value={tempName.middleName}
-                      onChange={(e) => setTempName(prev => ({ ...prev, middleName: e.target.value }))}
-                      placeholder="Twoo"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Last Name:</label>
-                    <input
-                      type="text"
-                      value={tempName.lastName}
-                      onChange={(e) => setTempName(prev => ({ ...prev, lastName: e.target.value }))}
-                      placeholder="Dela Cruz"
-                    />
-                  </div>
+                  <button className="save-btn" onClick={handleSaveName}>
+                    Save
+                  </button>
                 </div>
-                <button className="save-btn" onClick={handleSaveName}>
-                  Save
-                </button>
-              </div>
+              )}
             </div>
 
             {/* Change Email */}
@@ -276,25 +304,28 @@ const ManageAccount = () => {
                 onClick={() => confirmDiscard(hasEmailChanges(), () => {
                   setShowEmailForm(!showEmailForm);
                   if (!showEmailForm) openEmailForm();
+                  else setTempEmail(null);
                 })}
               >
                 <span>Change your email</span>
                 <span className="arrow">{showEmailForm ? '▼' : '▶'}</span>
               </button>
-              <div className="edit-form">
-                <div className="form-group">
-                  <label>Email Address:</label>
-                  <input
-                    type="email"
-                    value={tempEmail}
-                    onChange={(e) => setTempEmail(e.target.value)}
-                    placeholder="example@deped.edu.ph"
-                  />
+              {showEmailForm && (
+                <div className="edit-form">
+                  <div className="form-group">
+                    <label>Email Address:</label>
+                    <input
+                      type="email"
+                      value={tempEmail || ''}
+                      onChange={(e) => setTempEmail(e.target.value)}
+                      placeholder="example@deped.edu.ph"
+                    />
+                  </div>
+                  <button className="save-btn" onClick={handleSaveEmail}>
+                    Save
+                  </button>
                 </div>
-                <button className="save-btn" onClick={handleSaveEmail}>
-                  Save
-                </button>
-              </div>
+              )}
             </div>
 
             {/* Change Contact */}
@@ -304,25 +335,28 @@ const ManageAccount = () => {
                 onClick={() => confirmDiscard(hasContactChanges(), () => {
                   setShowContactForm(!showContactForm);
                   if (!showContactForm) openContactForm();
+                  else setTempContact(null);
                 })}
               >
                 <span>Change contact no.</span>
                 <span className="arrow">{showContactForm ? '▼' : '▶'}</span>
               </button>
-              <div className="edit-form">
-                <div className="form-group">
-                  <label>Contact Number:</label>
-                  <input
-                    type="tel"
-                    value={tempContact}
-                    onChange={(e) => setTempContact(e.target.value)}
-                    placeholder="+63 9123456789"
-                  />
+              {showContactForm && (
+                <div className="edit-form">
+                  <div className="form-group">
+                    <label>Contact Number:</label>
+                    <input
+                      type="tel"
+                      value={tempContact || ''}
+                      onChange={(e) => setTempContact(e.target.value)}
+                      placeholder="+63 9123456789"
+                    />
+                  </div>
+                  <button className="save-btn" onClick={handleSaveContact}>
+                    Save
+                  </button>
                 </div>
-                <button className="save-btn" onClick={handleSaveContact}>
-                  Save
-                </button>
-              </div>
+              )}
             </div>
           </div>
         )}

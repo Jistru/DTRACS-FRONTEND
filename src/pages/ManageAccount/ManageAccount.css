@@ -216,6 +216,7 @@
   box-sizing: border-box;
 }
 
+/* Save Button - Added spacing above */
 .save-btn {
   background-color: #2196F3;
   color: white;
@@ -225,6 +226,7 @@
   cursor: pointer;
   font-size: 14px;
   transition: background-color 0.2s ease, transform 0.1s ease;
+  margin-top: 16px; /* ✅ Increased space between input and button */
 }
 
 .save-btn:hover {
