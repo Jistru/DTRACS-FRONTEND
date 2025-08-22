@@ -127,6 +127,15 @@
   gap: 8px;
   text-decoration: none;
   font-family: inherit;
+  padding: 8px 16px;
+  background-color: transparent;
+  border: none;
+  border-radius: 6px;
+}
+
+.comment-link:hover {
+  background-color: #e3f2fd;
+  color: #1976d2;
 }
 
 .comment-link span {

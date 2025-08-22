@@ -1,8 +1,20 @@
+/* task-actions */
 .task-actions {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
   align-items: center;
+}
+
+/* File Label Wrapper */
+.task-actions-file-label {
+  cursor: pointer;
+  width: auto;
+}
+
+/* Complete Button */
+.task-actions .shared-button--primary {
+  margin-left: 10px;
 }
 
 .attach-button {
