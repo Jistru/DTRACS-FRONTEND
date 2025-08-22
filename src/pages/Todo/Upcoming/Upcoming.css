@@ -1,3 +1,4 @@
+/* Main App Container - Upcoming */
 .upcoming-app {
   font-family: Arial, sans-serif;
   background-color: #f5f5f5;
@@ -8,6 +9,7 @@
   flex-direction: column;
 }
 
+/* Main Content - Upcoming */
 .upcoming-main {
   flex: 1;
   padding: 0;
@@ -17,7 +19,7 @@
   margin-top: 40px;
 }
 
-/* Date */
+/* Date Header - Upcoming */
 .upcoming-date-header {
   font-size: 18px;
   font-weight: bold;
@@ -31,7 +33,14 @@
   margin-left: 10px;
 }
 
-/* Task Card */
+/* Task Link - Upcoming */
+.upcoming-task-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+/* Task Card - Upcoming (with hover effect) */
 .upcoming-card {
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -39,23 +48,24 @@
   background-color: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
 }
 
+.upcoming-card:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Task Title - Upcoming */
 .upcoming-card-title {
   font-size: 16px;
   font-weight: bold;
   color: #000;
 }
 
+/* Task Time - Upcoming */
 .upcoming-card-time {
   font-size: 12px;
   color: #666;
   margin-top: 5px;
-}
-
-/* Task Link */
-.upcoming-task-link {
-  text-decoration: none;
-  color: inherit;
-  display: block;
 }
