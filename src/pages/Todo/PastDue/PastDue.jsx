@@ -17,7 +17,7 @@ const PastDue = () => {
       title: "Final Report Submission",
       time: "10:00 AM"
     },
-    {
+    { 
       id: 3,
       title: "Group Presentation",
       time: "1:15 PM"
