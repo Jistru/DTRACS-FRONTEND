@@ -13,7 +13,7 @@
     import CommentBox from '../../../components/CommentBox/CommentBox';
     import AttachedFiles from '../../../components/AttachedFiles/AttachedFiles';
     import TaskActions from '../../../components/TaskActions/TaskActions';
-    import CommentList from '../../../components/CommentList/CommentList';
+    import CommentList from '../../../components/CommentList/CommentList'; // ← New component
     import SharedButton from '../../../components/SharedButton/SharedButton';
 
     // Toastify
@@ -120,6 +120,7 @@
       const handleEditStart = (c) => {
         setEditingId(c.id);
         setEditText(c.text);
+        
         // Auto-focus and resize after render
         setTimeout(() => {
           if (editTextareaRef.current) {
