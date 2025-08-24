@@ -1,13 +1,15 @@
 // src/pages/ManageAccount/ManageAccount.jsx
 import React, { useState, useRef } from 'react';
-import { FaCirclePlus } from "react-icons/fa6";
-import { FaUserEdit } from "react-icons/fa";
-import { MdAccountCircle } from "react-icons/md";
 import './ManageAccount.css';
 
 // Toastify
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+// Components
+import EditLinks from '../../components/EditLinks/EditLinks';
+import ProfileInfoCard from '../../components/ProfileInfoCard/ProfileInfoCard';
+import ProfileAvatar from '../../components/ProfileAvatar/ProfileAvatar'; // ✅ Import
 
 const ManageAccount = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -21,7 +23,7 @@ const ManageAccount = () => {
   // Mock user data
   const [userData, setUserData] = useState({
     firstName: "Juan",
-    middleName: "Juan",
+    middleName: "Ponce",
     lastName: "Dela Cruz",
     email: "example@deped.edu.ph",
     contactNumber: "+63 9123456789"
@@ -32,25 +34,23 @@ const ManageAccount = () => {
   const [tempEmail, setTempEmail] = useState(null);
   const [tempContact, setTempContact] = useState(null);
 
-  // Open Name Form
+  // Open forms
   const openNameForm = () => {
-    setTempName({ ...userData }); // Set only when opened
+    setTempName({ ...userData });
     setShowNameForm(true);
   };
 
-  // Open Email Form
   const openEmailForm = () => {
     setTempEmail(userData.email);
     setShowEmailForm(true);
   };
 
-  // Open Contact Form
   const openContactForm = () => {
     setTempContact(userData.contactNumber);
     setShowContactForm(true);
   };
 
-  // ✅ Only check for changes if form was opened (temp !== null)
+  // Check changes
   const hasNameChanges = () => {
     if (!tempName) return false;
     return (
@@ -73,7 +73,7 @@ const ManageAccount = () => {
   // Confirm discard
   const confirmDiscard = (hasChanges, onClose) => {
     if (!hasChanges) {
-      onClose(); // No real changes → close silently
+      onClose();
     } else {
       const confirmed = window.confirm("You have unsaved changes. Are you sure you want to discard them?");
       if (confirmed) {
@@ -96,7 +96,7 @@ const ManageAccount = () => {
       }));
       toast.success("Name updated successfully!");
       setShowNameForm(false);
-      setTempName(null); // Reset
+      setTempName(null);
     } else {
       toast.warn("Please fill in required fields.");
     }
@@ -157,11 +157,9 @@ const ManageAccount = () => {
   // Toggle edit mode
   const toggleEditMode = () => {
     if (isEditing) {
-      // On exit edit mode
       setIsEditing(false);
       toast.info("Exited edit mode.", { autoClose: 1500 });
     } else {
-      // Enter edit mode
       setIsEditing(true);
       toast.info("Edit mode enabled. Make your changes!", { autoClose: 2000 });
     }
@@ -172,193 +170,50 @@ const ManageAccount = () => {
       <main className="manage-account-main">
         {/* Profile Section */}
         <div className="profile-section">
-          {/* Profile Avatar */}
-          <div className="profile-avatar-container">
-            <div className="profile-avatar">
-              {avatar ? (
-                <img src={avatar} alt="Profile" className="avatar-image" />
-              ) : (
-                <MdAccountCircle size={120} />
-              )}
-            </div>
-            {/* Only show "Change" button in edit mode */}
-            {isEditing && (
-              <>
-                <button className="change-avatar-btn" onClick={handleButtonClick}>
-                  <FaCirclePlus size={16} color="#2196F3" /> Change
-                </button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                />
-              </>
-            )}
-          </div>
+          {/* ✅ Replaced with Component */}
+          <ProfileAvatar
+            avatar={avatar}
+            isEditing={isEditing}
+            onButtonClick={handleButtonClick}
+            fileInputRef={fileInputRef}
+            onFileChange={handleFileChange}
+          />
 
           {/* Profile Info Card */}
-          <div className="profile-info-card">
-            {/* Edit Icon - Top Right Inside Card */}
-            <div className="edit-icon-wrapper">
-              {!isEditing ? (
-                <button className="edit-icon-button" onClick={toggleEditMode} aria-label="Edit Profile">
-                  <FaUserEdit size={20} color="#2196F3" />
-                </button>
-              ) : (
-                <button className="edit-done-button" onClick={toggleEditMode}>
-                  Done
-                </button>
-              )}
-            </div>
-
-            <h2 className="profile-title">PROFILE INFORMATION</h2>
-            <div className="profile-details">
-              <div className="profile-row">
-                <span className="label">Name:</span>
-                <span className="value">{userData.firstName} {userData.middleName} {userData.lastName}</span>
-              </div>
-              <div className="profile-row">
-                <span className="label">Email:</span>
-                <span className="value">{userData.email}</span>
-              </div>
-              <div className="profile-row">
-                <span className="label">Contact Number:</span>
-                <span className="value">{userData.contactNumber}</span>
-              </div>
-              <div className="profile-row">
-                <span className="label">Position:</span>
-                <span className="value">Principal</span>
-              </div>
-              <div className="profile-row">
-                <span className="label">School:</span>
-                <span className="value">Binan Integrated National High School</span>
-              </div>
-              <div className="profile-row">
-                <span className="label">School Address:</span>
-                <span className="value">Nong Sto. Domingo, Biñan City, Laguna, 4024</span>
-              </div>
-            </div>
-          </div>
+          <ProfileInfoCard
+            userData={userData}
+            isEditing={isEditing}
+            toggleEditMode={toggleEditMode}
+          />
         </div>
 
-        {/* Edit Links - Only show in edit mode */}
+        {/* Edit Links */}
         {isEditing && (
-          <div className="edit-links">
-            {/* Change Name */}
-            <div className={`edit-link ${showNameForm ? 'show-form' : ''}`}>
-              <button
-                className="edit-link-button"
-                onClick={() => confirmDiscard(hasNameChanges(), () => {
-                  setShowNameForm(!showNameForm);
-                  if (!showNameForm) openNameForm();
-                  else setTempName(null); // Reset if closing
-                })}
-              >
-                <span>Change your name</span>
-                <span className="arrow">{showNameForm ? '▼' : '▶'}</span>
-              </button>
-              {showNameForm && (
-                <div className="edit-form">
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>First Name:</label>
-                      <input
-                        type="text"
-                        value={tempName?.firstName || ''}
-                        onChange={(e) => setTempName(prev => ({ ...prev, firstName: e.target.value }))}
-                        placeholder="Juan"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Middle Name:</label>
-                      <input
-                        type="text"
-                        value={tempName?.middleName || ''}
-                        onChange={(e) => setTempName(prev => ({ ...prev, middleName: e.target.value }))}
-                        placeholder="Twoo"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Last Name:</label>
-                      <input
-                        type="text"
-                        value={tempName?.lastName || ''}
-                        onChange={(e) => setTempName(prev => ({ ...prev, lastName: e.target.value }))}
-                        placeholder="Dela Cruz"
-                      />
-                    </div>
-                  </div>
-                  <button className="save-btn" onClick={handleSaveName}>
-                    Save
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Change Email */}
-            <div className={`edit-link ${showEmailForm ? 'show-form' : ''}`}>
-              <button
-                className="edit-link-button"
-                onClick={() => confirmDiscard(hasEmailChanges(), () => {
-                  setShowEmailForm(!showEmailForm);
-                  if (!showEmailForm) openEmailForm();
-                  else setTempEmail(null);
-                })}
-              >
-                <span>Change your email</span>
-                <span className="arrow">{showEmailForm ? '▼' : '▶'}</span>
-              </button>
-              {showEmailForm && (
-                <div className="edit-form">
-                  <div className="form-group">
-                    <label>Email Address:</label>
-                    <input
-                      type="email"
-                      value={tempEmail || ''}
-                      onChange={(e) => setTempEmail(e.target.value)}
-                      placeholder="example@deped.edu.ph"
-                    />
-                  </div>
-                  <button className="save-btn" onClick={handleSaveEmail}>
-                    Save
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Change Contact */}
-            <div className={`edit-link ${showContactForm ? 'show-form' : ''}`}>
-              <button
-                className="edit-link-button"
-                onClick={() => confirmDiscard(hasContactChanges(), () => {
-                  setShowContactForm(!showContactForm);
-                  if (!showContactForm) openContactForm();
-                  else setTempContact(null);
-                })}
-              >
-                <span>Change contact no.</span>
-                <span className="arrow">{showContactForm ? '▼' : '▶'}</span>
-              </button>
-              {showContactForm && (
-                <div className="edit-form">
-                  <div className="form-group">
-                    <label>Contact Number:</label>
-                    <input
-                      type="tel"
-                      value={tempContact || ''}
-                      onChange={(e) => setTempContact(e.target.value)}
-                      placeholder="+63 9123456789"
-                    />
-                  </div>
-                  <button className="save-btn" onClick={handleSaveContact}>
-                    Save
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+          <EditLinks
+            showNameForm={showNameForm}
+            showEmailForm={showEmailForm}
+            showContactForm={showContactForm}
+            tempName={tempName}
+            tempEmail={tempEmail}
+            tempContact={tempContact}
+            userData={userData}
+            setTempName={setTempName}
+            setTempEmail={setTempEmail}
+            setTempContact={setTempContact}
+            openNameForm={openNameForm}
+            openEmailForm={openEmailForm}
+            openContactForm={openContactForm}
+            confirmDiscard={confirmDiscard}
+            handleSaveName={handleSaveName}
+            handleSaveEmail={handleSaveEmail}
+            handleSaveContact={handleSaveContact}
+            hasNameChanges={hasNameChanges}
+            hasEmailChanges={hasEmailChanges}
+            hasContactChanges={hasContactChanges}
+            setShowNameForm={setShowNameForm}
+            setShowEmailForm={setShowEmailForm}
+            setShowContactForm={setShowContactForm}
+          />
         )}
       </main>
 
