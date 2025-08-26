@@ -11,7 +11,7 @@ const TaskTabs = () => {
   return (
     <div className="task-tabs-container">
       <div className="task-tabs">
-        <Link to="/todo" className={`task-tab ${isActive('/todo') ? 'active' : ''}`}>
+        <Link to="/todo/upcoming" className={`task-tab ${isActive('/todo/upcoming') ? 'active' : ''}`}>
           Upcoming
           <span className="task-indicator task-green"></span>
         </Link>
