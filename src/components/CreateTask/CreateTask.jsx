@@ -4,7 +4,7 @@ import { FaPlus } from "react-icons/fa6";
 import './CreateTask.css';
 import TaskForm from '../TaskForm/TaskForm'; // Import modal
 
-const CreateTask = ({ onClick }) => {
+const CreateTask = ({ onTaskCreated }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const handleCreateClick = () => {
@@ -17,12 +17,19 @@ const CreateTask = ({ onClick }) => {
 
   return (
     <>
+      {/* ✅ Button remains 100% unchanged */}
       <button className="create-task-btn" onClick={handleCreateClick}>
         <FaPlus className="plus-icon" />
         <span className="create-text">Create</span>
       </button>
 
-      {isModalOpen && <TaskForm onClose={closeModal} />}
+      {/* ✅ Pass onTaskCreated to TaskForm */}
+      {isModalOpen && (
+        <TaskForm 
+          onClose={closeModal} 
+          onTaskCreated={onTaskCreated} 
+        />
+      )}
     </>
   );
 };

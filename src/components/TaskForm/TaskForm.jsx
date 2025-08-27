@@ -12,42 +12,94 @@ import './TaskForm.css';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const TaskForm = ({ onClose }) => {
+const TaskForm = ({ onClose, onTaskCreated = () => {} }) => {
   const [formData, setFormData] = useState({
     for: 'All schools',
     assignedTo: 'All accounts',
-    dueDate: 'No due date',
+    dueDate: '', // ✅ Will store ISO date string
     title: '',
     description: '',
-    attachments: [],
     linkUrl: ''
   });
 
   const [isLinkInputVisible, setIsLinkInputVisible] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState([]); // ✅ Track uploaded files
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // eslint-disable-next-line no-unused-vars
+  // ✅ Handle file selection
   const handleFileUpload = (e) => {
-    console.log('Files:', e.target.files);
+    const files = Array.from(e.target.files);
+    
+    // Optional: Limit number of files
+    if (files.length > 5) {
+      toast.warn("You can only upload up to 5 files.");
+      return;
+    }
+
+    // Optional: Limit file size (e.g. 10MB)
+    const validFiles = files.filter(file => {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.warn(`${file.name} is too large (max 10MB).`);
+        return false;
+      }
+      return true;
+    });
+
+    // Add to uploaded files
+    setUploadedFiles(prev => [...prev, ...validFiles]);
+    toast.info(`${validFiles.length} file(s) uploaded.`);
+  };
+
+  // ✅ Remove a file
+  const removeFile = (fileName) => {
+    setUploadedFiles(prev => prev.filter(file => file.name !== fileName));
+    toast.info(`${fileName} removed.`);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // ✅ Show success toast instead of alert
+    if (!formData.title.trim()) {
+      toast.warn("Task title is required.");
+      return;
+    }
+
+    if (!formData.dueDate) {
+      toast.warn("Please select a due date.");
+      return;
+    }
+
+    // ✅ Convert ISO date to "August 5, 2025" format
+    const selectedDate = new Date(formData.dueDate);
+    const formattedDate = selectedDate.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+
+    // ✅ Send full task data
+    onTaskCreated({
+      title: formData.title,
+      description: formData.description,
+      dueDate: formData.dueDate,
+      formattedDate // Pass formatted date
+    });
+
+    // ✅ Reset and close
+    setUploadedFiles([]);
+    setIsLinkInputVisible(false);
+    onClose();
+
     toast.success("Task created successfully!", {
       autoClose: 2000,
       hideProgressBar: false,
       position: "top-right",
       theme: "colored"
     });
-
-    // Close modal after success
-    onClose();
   };
 
   const toggleLinkInput = () => {
@@ -60,7 +112,7 @@ const TaskForm = ({ onClose }) => {
         <button className="task-form-close" onClick={onClose}>×</button>
 
         <form onSubmit={handleSubmit} className="task-form">
-          {/* Row 1: For, Assigned to, Due Date */}
+          {/* Row 1: For, Assigned to */}
           <div className="task-form-row">
             <div className="task-form-group">
               <label htmlFor="for">For</label>
@@ -78,12 +130,15 @@ const TaskForm = ({ onClose }) => {
             </div>
             <div className="task-form-group">
               <label htmlFor="dueDate">Due Date</label>
-              <select id="dueDate" name="dueDate" value={formData.dueDate} onChange={handleChange}>
-                <option>No due date</option>
-                <option>Today</option>
-                <option>Tomorrow</option>
-                <option>Next week</option>
-              </select>
+              <input
+                type="date"
+                id="dueDate"
+                name="dueDate"
+                value={formData.dueDate}
+                onChange={handleChange}
+                required
+                className="date-picker-input"
+              />
             </div>
           </div>
 
@@ -143,6 +198,7 @@ const TaskForm = ({ onClose }) => {
                     id="upload"
                     onChange={handleFileUpload}
                     style={{ display: 'none' }}
+                    multiple
                   />
                   <button type="button" className="upload-circle" onClick={() => document.getElementById('upload').click()}>
                     <FiUpload size={20} />
@@ -159,6 +215,24 @@ const TaskForm = ({ onClose }) => {
                 </div>
               </div>
             </div>
+
+            {/* ✅ Show uploaded file names */}
+            {uploadedFiles.length > 0 && (
+              <div className="uploaded-files-list">
+                {uploadedFiles.map((file, index) => (
+                  <div className="uploaded-file-item" key={index}>
+                    <span className="file-name">{file.name}</span>
+                    <button
+                      type="button"
+                      className="remove-file-btn"
+                      onClick={() => removeFile(file.name)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Link Input Container (below attach) */}
             {isLinkInputVisible && (
